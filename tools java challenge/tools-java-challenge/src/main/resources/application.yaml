@@ -1,0 +1,31 @@
+# H2 DATABASE
+spring:
+  application:
+    name: tools-java-challenge
+  datasource:
+    url: jdbc:h2:mem:javatoolschallenge
+    driver-class-name: org.h2.Driver
+    username: admin
+    password: ""
+  h2:
+    console:
+      enabled: true  # URL -> http://localhost:8080/h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+
+# SWAGGER / OpenAPI
+springdoc:
+  swagger-ui:
+    operationsSorter: method  # URL -> http://localhost:8080/swagger-ui/index.html
+
+#LOG
+logging:
+  level:
+    org.hibernate: WARN
+    org.springframework: WARN
