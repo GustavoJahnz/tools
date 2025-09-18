@@ -1,12 +1,14 @@
 package challenge.tools.service.transacao;
 
-import challenge.tools.util.exception.NotFoundException;
 import challenge.tools.dto.transacao.TransacaoPagamentoRequisicaoDTO;
+import challenge.tools.dto.transacao.TransacaoRequestParams;
 import challenge.tools.entity.transacao.Descricao;
 import challenge.tools.entity.transacao.FormaPagamento;
 import challenge.tools.entity.transacao.Transacao;
 import challenge.tools.enumeration.transacao.TransacaoStatusEnum;
 import challenge.tools.repository.transacao.TransacaoRepository;
+import challenge.tools.repository.transacao.TransacaoSpecification;
+import challenge.tools.util.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,9 @@ public class TransacaoService {
         return transacaoRepository.findById(id).orElseThrow(NotFoundException.from("404", "Transação não encontrada"));
     }
 
-    public Page<Transacao> listarTransacoes(Pageable pageable) {
-        return transacaoRepository.findAll(pageable);
+    public Page<Transacao> listarTransacoes(TransacaoRequestParams params, Pageable pageable) {
+        TransacaoSpecification transacaoSpecification = new TransacaoSpecification(params);
+        return transacaoRepository.findAll(transacaoSpecification, pageable);
+
     }
 }

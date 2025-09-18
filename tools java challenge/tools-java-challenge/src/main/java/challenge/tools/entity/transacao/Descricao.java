@@ -22,14 +22,12 @@ public class Descricao {
     private String codigoAutorizacao;
     private TransacaoStatusEnum status;
 
-
-
     public Descricao(BigDecimal valor, LocalDateTime dataHora, String estabelecimento) {
         this.valor = valor;
         this.dataHora = dataHora;
         this.estabelecimento = estabelecimento;
         this.status = TransacaoStatusEnum.AUTORIZADA;
-        this.nsu = String.format("%06d", new Random().nextInt(999999));
-        this.codigoAutorizacao = String.format("%06d", new Random().nextInt(999999));
+        this.nsu = "1234567890";
+        this.codigoAutorizacao = "1234567890";
     }
 }
