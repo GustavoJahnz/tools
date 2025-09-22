@@ -5,9 +5,11 @@ import challenge.tools.dto.transacao.TransacaoRequestParams;
 import challenge.tools.entity.transacao.Descricao;
 import challenge.tools.entity.transacao.FormaPagamento;
 import challenge.tools.entity.transacao.Transacao;
+import challenge.tools.enumeration.transacao.TipoFormaPagamentoEnum;
 import challenge.tools.enumeration.transacao.TransacaoStatusEnum;
 import challenge.tools.repository.transacao.TransacaoRepository;
 import challenge.tools.repository.transacao.TransacaoSpecification;
+import challenge.tools.util.exception.BusinessException;
 import challenge.tools.util.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,12 +26,20 @@ public class TransacaoService {
 
     public Transacao realizarEstorno(Long id) {
         Transacao transacao = this.obterPorId(id);
+        if(transacao.getDescricao().getStatus().equals(TransacaoStatusEnum.NEGADA)){
+            throw new BusinessException("Transação já foi estornada!");
+        }
         transacao.getDescricao().setStatus(TransacaoStatusEnum.NEGADA);
         transacao.setDataAtualizacao(LocalDateTime.now());
         return transacaoRepository.save(transacao);
     }
 
     public Transacao adicionarTransacao(TransacaoPagamentoRequisicaoDTO dto) {
+        if(dto.formaPagamento().tipo().equals(TipoFormaPagamentoEnum.AVISTA)){
+            if(dto.formaPagamento().parcelas()!=1){
+                throw new BusinessException("Pagamento avista só pode ter uma parcela");
+            }
+        }
         Descricao descricao = new Descricao(dto.descricao().valor(), dto.descricao().dataHora(), dto.descricao().estabelecimento());
         FormaPagamento formaPagamento = new FormaPagamento(dto.formaPagamento().tipo(), dto.formaPagamento().parcelas());
         Transacao transacao = new Transacao(dto.cartao(), descricao, formaPagamento);
@@ -43,6 +53,5 @@ public class TransacaoService {
     public Page<Transacao> listarTransacoes(TransacaoRequestParams params, Pageable pageable) {
         TransacaoSpecification transacaoSpecification = new TransacaoSpecification(params);
         return transacaoRepository.findAll(transacaoSpecification, pageable);
-
     }
 }

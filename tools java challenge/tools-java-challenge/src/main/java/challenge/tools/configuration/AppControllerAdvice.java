@@ -1,7 +1,9 @@
 package challenge.tools.configuration;
 
-import challenge.tools.util.exception.NotFoundException;
+import challenge.tools.util.exception.BusinessException;
 import challenge.tools.util.exception.ErrorResponse;
+import challenge.tools.util.exception.NotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -13,8 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
@@ -30,15 +31,21 @@ public class AppControllerAdvice {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-		LOGGER.error("Exceção não tratada pela aplicação", e);
+		LOGGER.error("Exceção:", e);
 		return ResponseEntity.status(e.getStatusCode()).contentType(MediaType.APPLICATION_JSON)
 				.body(new ErrorResponse(BAD_REQUEST,
 						"Erro na validação dos dados da requisição"));
 	}
 
+	@ExceptionHandler(BusinessException.class)
+	public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e, HttpServletRequest servletRequest) {
+		return ResponseEntity.status(UNPROCESSABLE_ENTITY).contentType(MediaType.APPLICATION_JSON)
+				.body(new ErrorResponse(UNPROCESSABLE_ENTITY, e.getCode(), e.getMessage()));
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleGeralException(Exception e) {
-		LOGGER.error("Exceção não tratada pela aplicação", e);
+		LOGGER.error("Exceção:", e);
 		return ResponseEntity.status(INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
 				.body(new ErrorResponse(INTERNAL_SERVER_ERROR,
 						"Ocorreu um erro inesperado!"));
